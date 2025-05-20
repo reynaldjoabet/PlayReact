@@ -1,0 +1,30 @@
+[Unit]
+Description=PlayReact Platform
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=playreact
+Group=playreact
+Type=simple
+
+Environment="APP_SECRET=REPLACE_APP_SECRET"
+Environment="DEVOPS_HOME=/opt/playreact/devops"
+Environment="METRICS_URL=http://127.0.0.1:9090/api/v1"
+Environment="DB_USER=postgres"
+Environment="DB_PASSWORD="
+Environment="USE_OAUTH=true"
+Environment="SECURITY_TYPE=OIDC
+Environment="OIDC_CLIENT_ID=<OIDC Client ID>"
+Environment="OIDC_SECRET=<OIDC Secret>"
+Environment="OIDC_DISCOVERY_URI=<OIDC Discovery URI>"
+Environment="URL=<IP of the Platform>"
+Environment="OIDC_SCOPE=openid <any additional scopes>"
+Environment="OIDC_EMAIL_ATTR=<attribute of the email field>"
+Environment="USE_VIRTUAL_ENV=1"
+
+ExecStart=/opt/yugabyte/playreact/bin/playreact -Dconfig.file=/opt/playreact/platform.conf
+
+
+[Install]
+WantedBy=multi-user.target

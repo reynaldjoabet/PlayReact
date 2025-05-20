@@ -1,0 +1,47 @@
+{
+  "name": "frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "link1": "eslint .",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx src/",
+    "prettier": "prettier --write src/redesign/**/*",
+    "cleanup": "rm -rf dist && find ../public -maxdepth 1 -type f -delete",
+    "fetch-map": "mkdir -p build/static && curl 'http://s3-us-west-2.amazonaws.com/map.playreact.com/map/playreact.tar.gz' | tar -zx -C build/static",
+    "build": "npm run cleanup && CI=false REACT_APP_GIT_COMMIT=$(git rev-parse HEAD) vite build && npm run fetch-map",
+    "build:ci": "CI=true GENERATE_SOURCEMAP=false REACT_APP_GIT_COMMIT=$(git rev-parse HEAD) vite build && npm run fetch-map",
+    "build:dev": "CI=false REACT_APP_GIT_COMMIT=$(git rev-parse HEAD) && npm run cleanup && vite build",
+    "build:prod": "CI=true REACT_APP_GIT_COMMIT=$(git rev-parse HEAD) && npm run cleanup && vite build",
+    "build-and-copy": "npm run build:ci && ncp dist ../public",
+    "build-and-copy:dev": "npm run build:dev && cp -r dist/* ../public/",
+    "build-and-copy:prod": "npm run build:prod && cp -r dist/* ../public/",
+    "analyze": "source-map-explorer 'dist/assets/js/*.js'",
+    "test": "vite test",
+    "start": "vite --host",
+    "storybook": "start-storybook -p 6006 -s public",
+    "build-storybook": "build-storybook -s public",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "axios": "^1.9.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.22.0",
+    "@types/node": "^22.15.3",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^9.22.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^16.0.0",
+    "typescript": "~5.7.2",
+    "typescript-eslint": "^8.26.1",
+    "vite": "^6.3.1",
+    "vite-plugin-dynamic-import": "^1.6.0",
+    "vite-plugin-svgr": "^4.3.0"
+  }
+}
