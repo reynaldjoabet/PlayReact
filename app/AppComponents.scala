@@ -12,22 +12,22 @@ import scala.concurrent.Future
 import play.core.server.ssl.noCATrustManager
 import play.core.server.ssl.DefaultSSLEngineProvider
 import play.core.server.ssl.ServerSSLEngine
-// import play.api.libs.mailer.Email
-// import play.api.libs.mailer.Attachment
-// import play.api.libs.mailer.AttachmentData
-// import play.api.libs.mailer.AttachmentDataSource
-// import play.api.libs.mailer.CommonsMailer
-// import play.api.libs.mailer.MailerClient
-// import play.api.libs.mailer.MailerComponents
-// import play.api.libs.mailer.MailerConfigurationModule
-// import play.api.libs.mailer.MailerModule
-// import play.api.libs.mailer.SMTPConfiguration
-// import play.api.libs.mailer.SMTPConfigurationModule
-// import play.api.libs.mailer.SMTPDynamicMailer
-// import play.api.libs.mailer.SMTPMailer
-// import play.api.libs.mailer.AttachmentFile
-// import play.api.libs.mailer.AttachmentURL
-// import play.api.libs.mailer.Email   
+import play.api.libs.mailer.Email
+import play.api.libs.mailer.Attachment
+import play.api.libs.mailer.AttachmentData
+import play.api.libs.mailer.AttachmentDataSource
+import play.api.libs.mailer.CommonsMailer
+import play.api.libs.mailer.MailerClient
+import play.api.libs.mailer.MailerComponents
+import play.api.libs.mailer.MailerConfigurationModule
+import play.api.libs.mailer.MailerModule
+import play.api.libs.mailer.SMTPConfiguration
+import play.api.libs.mailer.SMTPConfigurationModule
+import play.api.libs.mailer.SMTPDynamicMailer
+import play.api.libs.mailer.SMTPMailer
+import play.api.libs.mailer.AttachmentFile
+import play.api.libs.mailer.AttachmentURL
+import play.api.libs.mailer.Email   
 import play.filters.gzip.GzipFilterComponents
 import play.filters.csrf.CSRFComponents
 import play.filters.cors
@@ -42,6 +42,8 @@ import play.filters.ip
 import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import java.security.Security
 import java.security.Provider
+//import org.bouncycastle.jce.provider.BouncyCastleProvider
+
 
 
 
@@ -60,8 +62,8 @@ class AppComponents(context: Context)
   override def httpFilters: Seq[EssentialFilter] = Seq()
 
 
-//   val bc:Provider = BouncyCastleProviderSingleton.getInstance().asInstanceOf[Provider]
-//   Security.addProvider(bc)
+  // val bc: BouncyCastleProvider= BouncyCastleProviderSingleton.getInstance()
+  // Security.addProvider(bc)
 
 
 

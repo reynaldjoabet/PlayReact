@@ -69,39 +69,188 @@ version := sys.process.Process("cat version.txt").lineStream_!.head
 
 Global / onChangedBuildSource := IgnoreSourceChanges
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala)
-.enablePlugins(UniversalPlugin,DockerPlugin,GraalVMNativeImagePlugin)
-
 ThisBuild/scalaVersion := "3.3.3"  // pac4j and nimbusds libraries need to be upgraded together.
 //   "org.pac4j" %% "play-pac4j" % "11.0.0-PLAY2.8",
 //   "org.pac4j" % "pac4j-oauth" % "5.7.7" exclude("commons-io" , "commons-io"),
 //   "org.pac4j" % "pac4j-oidc" % "5.7.7"  exclude("commons-io" , "commons-io"),
 
 routesGenerator := InjectedRoutesGenerator
-generateReverseRouter:= false
+// generateReverseRouter:= false
 
-generateJsReverseRouter := false
+// generateJsReverseRouter := false
 
-libraryDependencies ++= Seq( guice,ws,jdbc,evolutions,logback,ehcache,filters,openId,
-"com.nimbusds" % "nimbus-jose-jwt" % "9.37.2",
-"com.nimbusds" % "oauth2-oidc-sdk" % "10.1",
-"com.github.pureconfig" %% "pureconfig-core" % "0.17.9",
-"com.github.pureconfig" %% "pureconfig-generic-scala3" % "0.17.9",
-//"io.github.iltotore" %% "iron-pureconfig" % "3.0.0"
-"org.playframework" %% "play-mailer" % "10.1.0",
-"org.playframework" %% "play-mailer-guice" % "10.1.0"
 
+val pac4jVersion = "6.1.3"
+val bouncycastleVersion = "1.81"
+val saml = "org.pac4j" % "pac4j-saml" % pac4jVersion exclude ("org.opensaml", "opensaml-core-api") excludeAll(ExclusionRule("org.springframework", "spring-core"))
+val pac4jDependencies = Seq(
+  "org.pac4j" % "pac4j-ldap" % pac4jVersion,
+  "org.pac4j" % "pac4j-core" % pac4jVersion,
+  "org.pac4j" % "pac4j-oidc" % pac4jVersion,
+  "org.pac4j" % "pac4j-jwt" % pac4jVersion,
+  "org.pac4j" % "pac4j-http" % pac4jVersion,
+  "org.pac4j" % "pac4j-cas" % pac4jVersion,
+  "org.pac4j" % "pac4j-oauth" % pac4jVersion,
+  saml
+).map(
+  _ excludeAll (
+    ExclusionRule("commons-io", "commons-io"),
+    ExclusionRule(organization = "com.fasterxml.jackson.core")
+  )
 )
 
-libraryDependencies ++= Seq(
-   "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.1" % Test,
-   "qa.hedgehog" %% "hedgehog-sbt" % "0.12.0" % Test,
-   //https://hedgehog.qa/
-"qa.hedgehog" %% "hedgehog-core" % "0.12.0" % Test
+val bouncycastleDependencies= Seq(
+  "org.bouncycastle" % "bcprov-jdk18on" % bouncycastleVersion,
+  "org.bouncycastle" % "bcpkix-jdk18on" % bouncycastleVersion,
+  "org.bouncycastle" % "bctls-jdk18on" % bouncycastleVersion,
+  "org.bouncycastle" % "bc-fips" % "2.1.0",
+  "org.bouncycastle" % "bcpkix-fips" % "2.1.9",
+  "org.bouncycastle" % "bctls-fips" % "2.1.20",
+  "org.bouncycastle" % "bcpg-jdk18on" % bouncycastleVersion
+)
+lazy val root = (project in file("."))
+  .enablePlugins(PlayScala)
+  .enablePlugins(UniversalPlugin, DockerPlugin, GraalVMNativeImagePlugin)
+  .settings(
+    libraryDependencies ++=  pac4jDependencies ++ Seq(
+      guice,
+      ws,
+      jdbc,
+      evolutions,
+      logback,
+      ehcache,
+      filters,
+      openId,
+      "org.apache.commons" % "commons-lang3" % "3.17.0",
+      "com.nimbusds" % "nimbus-jose-jwt" % "10.3",
+      "com.nimbusds" % "oauth2-oidc-sdk" % "11.26",
+      "com.github.pureconfig" %% "pureconfig-core" % "0.17.9",
+      "com.github.pureconfig" %% "pureconfig-generic-scala3" % "0.17.9",
+      // "io.github.iltotore" %% "iron-pureconfig" % "3.0.0"
+      "org.playframework" %% "play-mailer" % "10.1.0",
+      "org.playframework" %% "play-mailer-guice" % "10.1.0",
+      "org.pac4j" %% "play-pac4j" % "12.0.2-PLAY3.0",
+      "com.sendgrid" % "sendgrid-java" % "4.10.3",
+      "de.dentrassi.crypto" % "pem-keystore" % "3.0.0",
+      "com.microsoft.azure" % "msal4j" % "1.21.0",
+      "com.azure" % "azure-core" % "1.55.3",
+      "com.azure" % "azure-identity" % "1.16.1",
+      "com.azure" % "azure-security-keyvault-keys" % "4.9.4",
+      "com.azure" % "azure-storage-blob" % "12.30.0",
+      "com.azure" % "azure-storage-blob-batch" % "12.26.0",
+      "com.azure.resourcemanager" % "azure-resourcemanager" % "2.51.0",
+      "com.azure.resourcemanager" % "azure-resourcemanager-marketplaceordering" % "1.0.0",
+      "com.authlete" % "authlete-java-common" % "4.20",
+      "ch.qos.logback" % "logback-classic" % "1.5.18",
+      "jakarta.mail" % "jakarta.mail-api" % "2.1.2",
+      "io.swagger.core.v3" % "swagger-annotations" % "2.2.31",
+      "com.bettercloud" % "vault-java-driver" % "5.1.0",
+      "org.bouncycastle" % "bc-fips" % "2.1.0",
+      "org.bouncycastle" % "bcpkix-fips" % "2.1.9",
+      "org.bouncycastle" % "bctls-fips" % "2.1.20",
+      "com.zaxxer" % "HikariCP" % "6.3.0",
+      "com.google.cloud" % "google-cloud-secretmanager" % "2.66.0",
+      "com.google.apis" % "google-api-services-compute" % "v1-rev20250415-2.0.0",
+      "com.google.apis" % "google-api-services-iam" % "v2-rev20250502-2.0.0",
+      "com.google.cloud" % "google-cloud-compute" % "1.73.0",
+      "com.google.cloud" % "google-cloud-storage" % "2.52.3",
+      "com.google.cloud" % "google-cloud-kms" % "2.66.0",
+      "com.google.cloud" % "google-cloud-resourcemanager" % "1.65.0",
+      "com.google.cloud" % "google-cloud-logging" % "3.22.4",
+      "com.google.oauth-client" % "google-oauth-client" % "1.39.0",
+      "org.projectlombok" % "lombok" % "1.18.38",
+      "com.amazonaws" % "aws-java-sdk-ec2" % "1.12.785",
+      "com.amazonaws" % "aws-java-sdk-kms" % "1.12.785",
+      "com.amazonaws" % "aws-java-sdk-iam" % "1.12.785",
+      "com.amazonaws" % "aws-java-sdk-sts" % "1.12.785",
+      "com.amazonaws" % "aws-java-sdk-s3" % "1.12.785",
+      "com.amazonaws" % "aws-java-sdk-elasticloadbalancingv2" % "1.12.785",
+      "com.amazonaws" % "aws-java-sdk-route53" % "1.12.785",
+      "com.amazonaws" % "aws-java-sdk-cloudtrail" % "1.12.785",
+      "software.amazon.awssdk" % "rds" % "2.31.70",
+      "jakarta.validation" % "jakarta.validation-api" % "3.1.1",
+      "jakarta.persistence" % "jakarta.persistence-api" % "3.2.0",
+      "org.postgresql" % "postgresql" % "42.7.7",
+      "org.flywaydb" % "flyway-core" % "11.9.1",
+      "io.ebean" % "ebean" % "17.0.0-RC3",
+      "be.objectify" %% "deadbolt-java" % "3.0.0" // not part of  Pac4j Implementation For Play Framework (Scala 3) in vers
+    )
+  )
+  .settings(
+    libraryDependencies ++= Seq(
+      "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.1" % Test,
+      "qa.hedgehog" %% "hedgehog-sbt" % "0.12.0" % Test,
+      // https://hedgehog.qa/
+      "qa.hedgehog" %% "hedgehog-core" % "0.12.0" % Test
+    )
+  )
 
+
+val pekkoVersion = "1.1.4"
+
+val pekkoLibs = Seq(
+  "org.apache.pekko" %% "pekko-actor-typed",
+  "org.apache.pekko" %% "pekko-actor",
+  "org.apache.pekko" %% "pekko-protobuf-v3",
+  "org.apache.pekko" %% "pekko-serialization-jackson",
+  "org.apache.pekko" %% "pekko-slf4j",
+  "org.apache.pekko" %% "pekko-stream"
 )
 
+val pekkoOverrides = pekkoLibs.map(_ % pekkoVersion)
 
+dependencyOverrides ++= pekkoOverrides
+
+val jacksonVersion = "2.19.1"
+
+val jacksonLibs = Seq(
+  "com.fasterxml.jackson.core" % "jackson-core",
+  "com.fasterxml.jackson.core" % "jackson-annotations",
+  "com.fasterxml.jackson.core" % "jackson-databind",
+  "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8",
+  "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310",
+  "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor",
+  "com.fasterxml.jackson.dataformat" % "jackson-dataformat-xml",
+  "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml",
+  "com.fasterxml.jackson.module" % "jackson-module-parameter-names",
+  "com.fasterxml.jackson.module" %% "jackson-module-scala"
+)
+
+val jacksonOverrides = jacksonLibs.map(_ % jacksonVersion)
+
+dependencyOverrides ++= jacksonOverrides
+
+val samlOverrides = Seq(
+  // "org.opensaml" % "opensaml-core-api",
+  "org.opensaml" % "opensaml-saml-api",
+  "org.opensaml" % "opensaml-saml-impl",
+  "org.opensaml" % "opensaml-soap-api",
+  "org.opensaml" % "opensaml-xmlsec-api",
+  "org.opensaml" % "opensaml-security-api",
+  "org.opensaml" % "opensaml-security-impl",
+  "org.opensaml" % "opensaml-profile-api",
+  "org.opensaml" % "opensaml-profile-impl",
+  "org.opensaml" % "opensaml-messaging-api",
+  "org.opensaml" % "opensaml-messaging-impl",
+  "org.opensaml" % "opensaml-storage-impl",
+  "org.opensaml" % "opensaml-xmlsec-impl",
+  "org.opensaml" % "opensaml-storage-impl",
+  "org.opensaml" % "opensaml-xmlsec-impl",
+  "org.opensaml" % "opensaml-storage-impl",
+  "org.opensaml" % "opensaml-messaging-impl",
+  "org.opensaml" % "opensaml-profile-api"
+).map(_ % "4.0.1")
+
+dependencyOverrides ++= samlOverrides
+
+//dependencyOverrides += "org.opensaml" % "opensaml-core-api" % "5.1.2"
+excludeDependencies += "org.eclipse.jetty" % "jetty-io"
+excludeDependencies += "org.eclipse.jetty" % "jetty-server"
+excludeDependencies += "commons-collections" % "commons-collections"
+excludeDependencies += "org.bouncycastle" % "bcpkix-jdk15on"
+excludeDependencies += "org.bouncycastle" % "bcprov-jdk15on"
+//excludeDependencies += "org.bouncycastle" % "bcpkix-jdk18on"
+//excludeDependencies += "org.bouncycastle" % "bcprov-jdk18on"
 
 versionGenerate := {
  log("version_metadata.json Generated")
